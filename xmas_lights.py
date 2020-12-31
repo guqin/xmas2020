@@ -6,7 +6,8 @@ import blynklib
 import random
 import threading
 
-BLYNK_AUTH = 'jd0wKHxiKLLotcYtyeymg3Pi8aQQklz3'
+
+BLYNK_AUTH = ''
 
 # initialize blynk
 blynk = blynklib.Blynk(BLYNK_AUTH)
@@ -89,17 +90,6 @@ def rainbow_cycle(wait=0.001):
         pixels.show()
         time.sleep(wait)
 
-def knight_rider():
-    idx = 0
-    for i in range(num_pixels):
-        pixels.fill((0, 0, 0))
-        pixels[i] = (255, 0, 0)
-        pixels.show()
-    for i in reversed(range(num_pixels)):
-        pixels.fill((0, 0, 0))
-        pixels[i] = (255, 0, 0)
-        pixels.show()
-
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
 def read_virtual_pin_handler(pin):
@@ -109,6 +99,10 @@ def read_virtual_pin_handler(pin):
 
 
 currentFunc = off
+
+@blynk.handle_event('write V2')
+def write_virtual_pin_handler(pin, value):
+    print("Received write to V2: {}".format(value))
 
 # register handler for virtual pin V4 write event
 @blynk.handle_event('write V0')
@@ -130,7 +124,6 @@ def write_virtual_pin_handler(pin, value):
         6: cyan,
         7: white,
         8: rainbow_cycle
-        9: knight_rider
     }
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
