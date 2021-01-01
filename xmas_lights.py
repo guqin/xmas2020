@@ -5,6 +5,7 @@ import requests
 import blynklib
 import random
 import multiprocessing as mp
+import numpy as np
 
 BLYNK_AUTH = open('blynk_auth.txt').read().strip()
 
@@ -116,6 +117,17 @@ def dazzle(wait=0.02):
         i = (i+1)%3
         time.sleep(wait)
 
+def sine(wait=0.02):
+    a = (np.sin(np.linspace(0,2*np.pi*2))*127).astype(np.int)
+    a = a.clip(0,255)
+    i = 0
+    while True:
+        pixels[:] = np.tile(np.roll(a,i),(3,1)).T
+        pixels.show()
+        i = (i+1)%num_pixels
+        time.sleep(wait)
+        
+
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
 def read_virtual_pin_handler(pin):
@@ -154,7 +166,8 @@ def write_virtual_pin_handler(pin, value):
         7: white,
         8: rainbow_cycle,
         9: knight_rider,
-        10: dazzle
+        10: dazzle,
+        11: sine
     }
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
