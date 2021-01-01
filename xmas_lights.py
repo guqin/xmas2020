@@ -4,10 +4,9 @@ import neopixel
 import requests
 import blynklib
 import random
-import threading
+import multiprocessing as mp
 
-
-BLYNK_AUTH = ''
+BLYNK_AUTH = open('blynk_auth.txt').read().strip()
 
 # initialize blynk
 blynk = blynklib.Blynk(BLYNK_AUTH)
@@ -83,11 +82,38 @@ def wheel(pos):
     return (r, g, b) if ORDER in (neopixel.RGB, neopixel.GRB) else (r, g, b, 0)
 
 def rainbow_cycle(wait=0.001):
-    for j in range(255):
-        for i in range(num_pixels):
-            pixel_index = (i * 256 // num_pixels) + j
-            pixels[i] = wheel(pixel_index & 255)
-        pixels.show()
+    while True:
+        for j in range(255):
+            for i in range(num_pixels):
+                pixel_index = (i * 256 // num_pixels) + j
+                pixels[i] = wheel(pixel_index & 255)
+            pixels.show()
+            time.sleep(wait)
+
+def knight_rider(wait=0.02):
+    kernel = [(255,0,0)]*7
+    while True:
+        for i in list(range(3,num_pixels-3))+list(reversed(range(3,num_pixels-4))):
+            pixels.fill((0, 0, 0))
+            a = max(i-len(kernel)//2,0)
+            b = min(i+len(kernel)//2+1, num_pixels)
+            pixels[a:b] = kernel
+            pixels.show()
+            time.sleep(wait)
+
+def dazzle(wait=0.02):
+    i = 0
+    while True:
+        if i==0:
+            pixels.fill((255, 0, 0))
+            pixels.show()
+        elif i==1:
+            pixels.fill((0, 255, 0))
+            pixels.show()
+        else:
+            pixels.fill((0, 0, 255))
+            pixels.show()
+        i = (i+1)%3
         time.sleep(wait)
 
 # register handler for virtual pin V11 reading
@@ -99,6 +125,8 @@ def read_virtual_pin_handler(pin):
 
 
 currentFunc = off
+currentThread = mp.Process(target=currentFunc)
+currentThread.start()
 
 @blynk.handle_event('write V2')
 def write_virtual_pin_handler(pin, value):
@@ -108,6 +136,7 @@ def write_virtual_pin_handler(pin, value):
 @blynk.handle_event('write V0')
 def write_virtual_pin_handler(pin, value):
     global currentFunc
+    global currentThread
     WRITE_EVENT_PRINT_MSG = "[WRITE_VIRTUAL_PIN_EVENT] Pin: V{} Value: '{}'"
     print(WRITE_EVENT_PRINT_MSG.format(pin, value))
     #print(value, type(value))
@@ -123,16 +152,19 @@ def write_virtual_pin_handler(pin, value):
         5: yellow,
         6: cyan,
         7: white,
-        8: rainbow_cycle
+        8: rainbow_cycle,
+        9: knight_rider,
+        10: dazzle
     }
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
     blynk.virtual_write(1, currentFunc.__name__)
-
+    currentThread.terminate()
+    currentThread = mp.Process(target=currentFunc)
+    currentThread.start()
 
 ###########################################################
 # infinite loop that waits for event
 ###########################################################
 while True:
     blynk.run()
-    currentFunc()
