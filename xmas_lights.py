@@ -162,6 +162,29 @@ def glow(wait=0.02):
         j = (j+1)%256
         time.sleep(wait)
 
+def love_kisses():
+	a = 0.75
+	b = 0.25
+	eight = "---..."
+	while True:
+		for j in range(2):
+			for i in range(len(eight)):
+				if i <= 2:
+					pixels.fill((255, 0, 255))
+					pixels.show()
+					time.sleep(a)
+					pixels.fill((0, 0, 0))
+					pixels.show()
+					time.sleep(b)
+				if i > 2:
+					pixels.fill((255, 0, 255))
+					pixels.show()
+					time.sleep(b)
+					pixels.fill((0, 0, 0))
+					pixels.show()
+					time.sleep(b)
+		time.sleep(5)
+
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
 def read_virtual_pin_handler(pin):
@@ -204,7 +227,8 @@ def write_virtual_pin_handler(pin, value):
         11: sine,
         12: twinkle,
         13: random,
-        14: glow
+        14: glow,
+        15: love_kisses
     }
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
