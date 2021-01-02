@@ -165,7 +165,7 @@ def glow(wait=0.02):
 def love_kisses():
 	a = 0.75
 	b = 0.25
-	eight = "---..."
+	eight = "---.."
 	while True:
 		for j in range(2):
 			for i in range(len(eight)):
