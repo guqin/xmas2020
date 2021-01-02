@@ -117,8 +117,8 @@ def dazzle(wait=0.02):
         i = (i+1)%3
         time.sleep(wait)
 
-def sine(wait=0.02):
-    a = (np.sin(np.linspace(0,2*np.pi*2))*127).astype(np.int)
+def sine(wait=0.04):
+    a = (np.sin(np.linspace(0,2*np.pi, num_pixels))*127).astype(np.int)
     a = a.clip(0,255)
     i = 0
     while True:
@@ -126,7 +126,41 @@ def sine(wait=0.02):
         pixels.show()
         i = (i+1)%num_pixels
         time.sleep(wait)
-        
+
+def twinkle(wait=0.02):
+    p = 0.001
+    maxDelay = int(4/wait)
+    disableCount = np.zeros(num_pixels).astype(np.int)
+    a = np.zeros(num_pixels).astype(np.int)
+    while True:
+        temp = np.random.rand(num_pixels) < p
+        disableCount[temp] = (np.random.rand(temp.sum())*maxDelay).astype(np.int)
+        a[disableCount>0] = 0
+        a[disableCount==0] = 255
+        disableCount = np.maximum(disableCount-1,0)
+        pixels[:] = np.tile(a,(3,1)).T
+        pixels.show()
+        time.sleep(wait)        
+
+def random(wait=0.1):
+    while True:
+        pixels[:] = np.random.randint(0,256,(num_pixels,3))
+        pixels.show()
+        time.sleep(wait)
+
+def glow(wait=0.02):
+    #a = (np.sin(np.linspace(0,2*np.pi, num_pixels))*127).astype(np.int)
+    #a = a.clip(0,255)
+    a = np.sin(np.linspace(0,2*np.pi*4, 463))+1
+    i = 0
+    j = 0
+    while True:
+        #pixels[:] = np.full((num_pixels,3), a[i])
+        pixels[:] = np.clip((np.array([wheel(j)]*num_pixels)*a[i]).astype(np.int),0,255)
+        pixels.show()
+        i = (i+1)%463
+        j = (j+1)%256
+        time.sleep(wait)
 
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
@@ -167,7 +201,10 @@ def write_virtual_pin_handler(pin, value):
         8: rainbow_cycle,
         9: knight_rider,
         10: dazzle,
-        11: sine
+        11: sine,
+        12: twinkle,
+        13: random,
+        14: glow
     }
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
