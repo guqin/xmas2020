@@ -1,3 +1,4 @@
+# some code adapted from DanStach/rpi-ws2811
 import time
 import board
 import neopixel
@@ -13,12 +14,13 @@ BLYNK_AUTH = open('blynk_auth.txt').read().strip()
 blynk = blynklib.Blynk(BLYNK_AUTH)
 
 
+
 # Choose an open pin connected to the Data In of the NeoPixel strip, i.e. board.D18
 # NeoPixels must be connected to D10, D12, D18 or D21 to work.
 pixel_pin = board.D18
 
 # The number of NeoPixels
-num_pixels = 50
+num_pixels = 100
 
 # The order of the pixel colors - RGB or GRB. Some NeoPixels have red and green reversed!
 # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
@@ -28,6 +30,32 @@ pixels = neopixel.NeoPixel(
     pixel_pin, num_pixels, brightness=0.2, auto_write=False, pixel_order=ORDER
 )
 
+
+
+
+wait_time = .5
+wait_animate = .1
+cycleFactor = 1
+
+cred = (255, 0, 0)
+cblue = (0, 0, 255)
+cgreen = (0, 255, 0)
+cyellow = (255, 255, 0)
+ccyan = (0, 255, 255)
+cpurple = (160, 32, 240)
+cpurple2 = (76,0,200)
+cpurple3 = (100,0,200)
+corange = (255, 165, 0)
+cwhite = (255, 255, 255)
+cblk = (0, 0, 0)
+
+
+def brightnessRGB(red, green, blue, bright):
+    r = (bright/256.0)*red
+    g = (bright/256.0)*green
+    b = (bright/256.0)*blue
+    return (int(r), int(g), int(b))
+        
 
 def off():
     pixels.fill((0, 0, 0))
@@ -81,6 +109,21 @@ def wheel(pos):
         g = int(pos * 3)
         b = int(255 - pos * 3)
     return (r, g, b) if ORDER in (neopixel.RGB, neopixel.GRB) else (r, g, b, 0)
+
+
+def colorAll5Color(c1, c2, c3, c4, c5):
+    for i in range(num_pixels):
+        j = i % 5
+        if(j == 1): # 
+            pixels[i] = c1
+        if(j == 2): # 
+            pixels[i] = c2
+        if(j == 3): # 
+            pixels[i] = c3
+        if(j == 4): # 
+            pixels[i] = c4
+        if(j == 0): 
+            pixels[i] = c5
 
 def rainbow_cycle(wait=0.001):
     while True:
@@ -148,6 +191,184 @@ def random(wait=0.1):
         pixels.show()
         time.sleep(wait)
 
+
+
+# HalloweenExisiting - mimics a heart beat pulse, with 2 beats at different speeds. The existing colors 
+# on the pixel strip are preserved, rather than a single color.
+#
+# HalloweenExisiting(beat1Step, beat1FadeInDelay, beat1FadeOutDelay, beat1Delay,
+#                     beat2Step, beat2FadeInDelay, beat2FadeOutDelay, beat1Delay, cycles):
+# HalloweenExisiting(3, .005, .003, 0.001, 6, .002, .003, 0.05, 10)
+#
+#   beat1Step: (1-255) first beat color transition step
+#   beat1FadeInDelay: (0-2147483647) first beat fade in trasition speed, in seconds
+#   beat1FadeOutDelay: (0-2147483647) first beat fade out trasition speed, in seconds
+#   beat1Delay: (0-2147483647)  beat time delay bewteen frist and sencond beat, in seconds
+#   beat2Step: (1-255) second beat color transition step
+#   beat2FadeInDelay: (0-2147483647) second beat fade in trasition speed, in seconds
+#   beat2FadeOutDelay: (0-2147483647) second beat fade out trasition speed, in seconds
+#   beat1Delay: (0-2147483647)  beat time delay bewteen sencond and first beat, in seconds
+#   cycles: (1-2147483647) number of times this effect will run
+def HalloweenExisiting(beat1Step, beat1FadeInDelay, beat1FadeOutDelay, beat1Delay, beat2Step, beat2FadeInDelay, beat2FadeOutDelay, beat2Delay, cycles):
+#HalloweenExisiting(beat1Step, beat1FadeInDelay, beat1FadeOutDelay, beat1Delay, 
+#                   beat2Step, beat2FadeInDelay, beat2FadeOutDelay, beat2Delay, cycles):
+    # gather existing colors in strip of pixel
+    stripExisting = []
+    maxbright = 256
+    minbright = 15 
+    for i in range(num_pixels):
+        stripExisting.append(pixels[i])
+
+    for loop in range(cycles):               
+
+        for ii in range(minbright, maxbright, beat1Step): #for ( ii = 1 ; ii <252 ; ii = ii = ii + x)
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat1FadeInDelay)
+
+        for ii in range(maxbright, minbright, -beat1Step): #for (int ii = 252 ; ii > 3 ; ii = ii - x){
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat1FadeOutDelay)
+            
+        time.sleep(beat1Delay)
+        
+        for ii in range(minbright, maxbright, beat1Step): #for (int ii = 1 ; ii <255 ; ii = ii = ii + y){
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat2FadeInDelay)
+
+        for ii in range(maxbright, minbright, -beat1Step): #for (int ii = 255 ; ii > 1 ; ii = ii - y){
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat2FadeOutDelay)
+    
+
+
+# HeartBeatExisiting - mimics a heart beat pulse, with 2 beats at different speeds. The existing colors 
+# on the pixel strip are preserved, rather than a single color.
+#
+# HeartBeatExisiting(beat1Step, beat1FadeInDelay, beat1FadeOutDelay, beat1Delay,
+#                     beat2Step, beat2FadeInDelay, beat2FadeOutDelay, beat1Delay, cycles):
+# HeartBeatExisiting(3, .005, .003, 0.001, 6, .002, .003, 0.05, 10)
+#
+#   beat1Step: (1-255) first beat color transition step
+#   beat1FadeInDelay: (0-2147483647) first beat fade in trasition speed, in seconds
+#   beat1FadeOutDelay: (0-2147483647) first beat fade out trasition speed, in seconds
+#   beat1Delay: (0-2147483647)  beat time delay bewteen frist and sencond beat, in seconds
+#   beat2Step: (1-255) second beat color transition step
+#   beat2FadeInDelay: (0-2147483647) second beat fade in trasition speed, in seconds
+#   beat2FadeOutDelay: (0-2147483647) second beat fade out trasition speed, in seconds
+#   beat1Delay: (0-2147483647)  beat time delay bewteen sencond and first beat, in seconds
+#   cycles: (1-2147483647) number of times this effect will run
+def HeartBeatExisiting(beat1Step, beat1FadeInDelay, beat1FadeOutDelay, beat1Delay, beat2Step, beat2FadeInDelay, beat2FadeOutDelay, beat2Delay, cycles):
+#HeartBeatExisiting(beat1Step, beat1FadeInDelay, beat1FadeOutDelay, beat1Delay, 
+#                   beat2Step, beat2FadeInDelay, beat2FadeOutDelay, beat2Delay, cycles):
+    # gather existing colors in strip of pixel
+    stripExisting = []
+    maxbright = 220
+    minbright = 10
+    for i in range(num_pixels):
+        stripExisting.append(pixels[i])
+
+    for loop in range(cycles):               
+
+        for ii in range(minbright, maxbright, beat1Step): #for ( ii = 1 ; ii <252 ; ii = ii = ii + x)
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat1FadeInDelay)
+
+        for ii in range(maxbright, minbright, -beat1Step): #for (int ii = 252 ; ii > 3 ; ii = ii - x){
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat1FadeOutDelay)
+            
+        time.sleep(beat1Delay)
+        
+        for ii in range(minbright, maxbright, beat1Step): #for (int ii = 1 ; ii <255 ; ii = ii = ii + y){
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat2FadeInDelay)
+
+        for ii in range(maxbright, minbright, -beat1Step): #for (int ii = 255 ; ii > 1 ; ii = ii - y){
+            for index in range(num_pixels):
+                r = stripExisting[index][0]
+                g = stripExisting[index][1]
+                b = stripExisting[index][2]
+                pixels[index] = brightnessRGB(r,g,b, ii) 
+                #pixels.fill( brightnessRGB(redo, greeno, blueo, ii) ) #strip.setBrightness(ii)
+            pixels.show()
+            time.sleep(beat2FadeOutDelay)
+    
+
+
+def CandleOrange(Count, FlickerDelay ):
+    pixels.fill(corange) # start with orange
+    for i in range(Count):
+        flicknum = np.random.randint(0,num_pixels-1)
+        for k in range(flicknum):
+            index = np.random.randint(0,num_pixels-1)
+            blueval = np.random.randint(0,75)
+            pixels[index] = (255,128 + int(blueval/2),blueval)
+        pixels.show()
+        time.sleep(FlickerDelay)
+
+
+def SnowSparkleExisting(Count, SparkleDelay, SpeedDelay):
+    # gather existing colors in strip of pixel
+    stripExisting = []
+    for i in range(num_pixels):
+        stripExisting.append(pixels[i])
+
+    for i in range(Count):
+        blinknum = np.random.randint(1,3)
+        for k in range(blinknum):
+            index = np.random.randint(0,num_pixels-1)
+            pixels[index] = (255,255,255)
+        pixels.show()
+        time.sleep(SparkleDelay)
+        for h in range(num_pixels):
+            pixels[h] = stripExisting[h]
+        pixels.show()
+        speedvar = np.random.randint(1,3)
+        time.sleep(SpeedDelay*speedvar)
+
+
 def glow(wait=0.02):
     #a = (np.sin(np.linspace(0,2*np.pi, num_pixels))*127).astype(np.int)
     #a = a.clip(0,255)
@@ -184,6 +405,31 @@ def love_kisses():
 					pixels.show()
 					time.sleep(b)
 		time.sleep(5)
+
+
+def sparkle():
+    print("enter spark")
+    colorAll5Color((255,0,0), cpurple ,(0,255,0), (0,0,255), (255,128,0  ))
+    pixels.show()
+    print("enter spark show")
+    while True:
+        SnowSparkleExisting(1000*cycleFactor, .1, .4)
+
+def heart():
+    while True:
+      pixels.fill(cred) 
+      HeartBeatExisiting(16, .001, .001, 0.001,16, .001, .001, 0.001, 10)
+
+def candle():
+      CandleOrange(1000*cycleFactor, .1)
+
+ 
+#def stpatrick():
+
+def halloween():
+    while True:
+      pixels.fill(cpurple2) 
+      HalloweenExisiting(1, .002, .002, 0.002,1, .002, .002, 0.002, 10)
 
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
@@ -228,7 +474,12 @@ def write_virtual_pin_handler(pin, value):
         12: twinkle,
         13: random,
         14: glow,
-        15: love_kisses
+        15: love_kisses,
+        16: sparkle,
+        17: candle,
+        18: heart,
+        19: halloween,
+        20: stpatrick
     }
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
@@ -241,4 +492,6 @@ def write_virtual_pin_handler(pin, value):
 # infinite loop that waits for event
 ###########################################################
 while True:
+    time.sleep(10)
+    heart()
     blynk.run()
