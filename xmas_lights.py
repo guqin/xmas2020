@@ -20,7 +20,7 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
 pixel_pin = board.D18
 
 # The number of NeoPixels
-num_pixels = 100
+num_pixels = 50
 
 # The order of the pixel colors - RGB or GRB. Some NeoPixels have red and green reversed!
 # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
@@ -457,7 +457,7 @@ def write_virtual_pin_handler(pin, value):
     #print(value, type(value))
     #print(pixels)
     val = int(value[0])
-    
+
     funcDict = {
         0: off,
         1: red,
@@ -478,9 +478,9 @@ def write_virtual_pin_handler(pin, value):
         16: sparkle,
         17: candle,
         18: heart,
-        19: halloween,
-        20: stpatrick
+        19: halloween
     }
+    
     currentFunc = funcDict.get(val, off)
     print(currentFunc.__name__)
     blynk.virtual_write(1, currentFunc.__name__)
@@ -492,6 +492,4 @@ def write_virtual_pin_handler(pin, value):
 # infinite loop that waits for event
 ###########################################################
 while True:
-    time.sleep(10)
-    heart()
     blynk.run()
