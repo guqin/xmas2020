@@ -425,7 +425,11 @@ def candle():
       CandleOrange(1000*cycleFactor, .1)
 
  
-#def stpatrick():
+def stpatrick():
+    pixels.fill(cgreen) 
+    pixels.show()
+    while True:
+        pixels.fill(cgreen) 
 
 def halloween():
     while True:
