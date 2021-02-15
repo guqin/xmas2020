@@ -430,6 +430,7 @@ def stpatrick():
     pixels.show()
     while True:
         pixels.fill(cgreen) 
+        SnowSparkleExisting(1000*cycleFactor, .1, .4)
 
 def halloween():
     while True:
