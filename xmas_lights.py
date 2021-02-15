@@ -418,7 +418,8 @@ def sparkle():
 def heart():
     while True:
       pixels.fill(cred) 
-      HeartBeatExisiting(16, .001, .001, 0.001,16, .001, .001, 0.001, 10)
+      scale = 10
+      HeartBeatExisiting(16, .001*scale, .001*scale, 0.001*scale,16*scale, .001*scale, .001*scale, 0.001*scale, 10)
 
 def candle():
       CandleOrange(1000*cycleFactor, .1)
