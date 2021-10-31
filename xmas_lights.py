@@ -7,6 +7,7 @@ import blynklib
 import random
 import multiprocessing as mp
 import numpy as np
+from matplotlib import cm
 
 BLYNK_AUTH = open('blynk_auth.txt').read().strip()
 
@@ -49,6 +50,26 @@ corange = (255, 165, 0)
 cwhite = (255, 255, 255)
 cblk = (0, 0, 0)
 
+gamma8Table = [
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255];
+
+
+gamma8 = np.vectorize(lambda x: gamma8Table[x])
 
 def brightnessRGB(red, green, blue, bright):
     r = (bright/256.0)*red
@@ -437,6 +458,26 @@ def halloween():
       pixels.fill(cpurple2) 
       HalloweenExisiting(1, .002, .002, 0.002,1, .002, .002, 0.002, 10)
 
+def purlpe_green():
+    purple = np.array([75,0,130])
+    green = np.array([0,180,0])
+    a = np.zeros((num_pixels,3), np.uint8)
+    a[::2,:] = purple
+    a[1::2,:] = green
+    pixels[:] = a
+    pixels.show()
+
+def dark_flame(wait=0.001):
+    while True:
+        a = np.random.poisson(64,256)/256
+        a = (cm.magma(a*1)*256)[:,:3]
+        a = gamma8(a.astype(int))
+        #a[:,1] *= 0.5
+        #a[:,2] *= 0.5
+        pixels[:] = a
+        pixels.show()
+        time.sleep(wait)
+
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
 def read_virtual_pin_handler(pin):
@@ -484,7 +525,9 @@ def write_virtual_pin_handler(pin, value):
         16: sparkle,
         17: candle,
         18: heart,
-        19: halloween
+        19: halloween,
+        20: purlpe_green,
+        21: dark_flame
     }
     
     currentFunc = funcDict.get(val, off)
