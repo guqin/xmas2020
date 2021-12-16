@@ -21,7 +21,7 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
 pixel_pin = board.D18
 
 # The number of NeoPixels
-num_pixels = 50
+num_pixels = 100
 
 # The order of the pixel colors - RGB or GRB. Some NeoPixels have red and green reversed!
 # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
@@ -443,6 +443,7 @@ def heart():
       HeartBeatExisiting(16, .001*scale, .001*scale, 0.001*scale,16*scale, .001*scale, .001*scale, 0.001*scale, 10)
 
 def candle():
+    while True:
       CandleOrange(1000*cycleFactor, .1)
 
  
@@ -458,7 +459,7 @@ def halloween():
       pixels.fill(cpurple2) 
       HalloweenExisiting(1, .002, .002, 0.002,1, .002, .002, 0.002, 10)
 
-def purlpe_green():
+def purple_green():
     purple = np.array([75,0,130])
     green = np.array([0,180,0])
     a = np.zeros((num_pixels,3), np.uint8)
@@ -477,6 +478,16 @@ def dark_flame(wait=0.001):
         pixels[:] = a
         pixels.show()
         time.sleep(wait)
+        
+def red_green():
+    red = np.array([255,0,0])
+    green = np.array([0,255,0])
+    a = np.zeros((num_pixels,3), np.uint8)
+    a[::2,:] = red
+    a[1::2,:] = green
+    pixels[:] = a
+    pixels.show()
+
 
 # register handler for virtual pin V11 reading
 @blynk.handle_event('read V0')
@@ -526,8 +537,9 @@ def write_virtual_pin_handler(pin, value):
         17: candle,
         18: heart,
         19: halloween,
-        20: purlpe_green,
-        21: dark_flame
+        20: purple_green,
+        21: dark_flame,
+        22: red_green
     }
     
     currentFunc = funcDict.get(val, off)
